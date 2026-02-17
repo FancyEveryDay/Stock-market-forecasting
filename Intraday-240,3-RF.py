@@ -20,7 +20,7 @@ constituents = {'-'.join(col.split('/')[::-1]):set(SP500_df[col].dropna())
                 for col in SP500_df.columns}
 
 constituents_train = {} 
-for test_year in range(1993,2016):
+for test_year in range(1999,2023):
     months = [str(t)+'-0'+str(m) if m<10 else str(t)+'-'+str(m) 
               for t in range(test_year-3,test_year) for m in range(1,13)]
     constituents_train[test_year] = [list(constituents[m]) for m in months]
@@ -82,9 +82,7 @@ def create_stock_data(df_close,df_open,st):
     m = list(range(1,20))+list(range(20,241,20))
     for k in m:
         st_data['IntraR'+str(k)] = daily_change.shift(k)
-    for k in m:
         st_data['CloseR'+str(k)] = df_close[st].pct_change(k).shift(1)
-    for k in m:
         st_data['OverNR'+str(k)] = df_open[st]/df_close[st].shift(k)-1
         
     st_data['R-future'] = daily_change 
@@ -103,7 +101,7 @@ for directory in [result_folder]:
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-for test_year in range(1993,2020):
+for test_year in range(1999,2026):
     
     print('-'*40)
     print(test_year)
@@ -120,9 +118,12 @@ for test_year in range(1993,2020):
     
     start = time.time()
     for st in stock_names:
-        st_train_data,st_test_data = create_stock_data(df_close,df_open,st)
-        train_data.append(st_train_data)
-        test_data.append(st_test_data)
+        try:
+            st_train_data,st_test_data = create_stock_data(df_close,df_open,st)
+            train_data.append(st_train_data)
+            test_data.append(st_test_data)
+        except:
+            pass
 
     train_data = np.concatenate([x for x in train_data])
     test_data = np.concatenate([x for x in test_data])
