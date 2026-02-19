@@ -35,18 +35,24 @@ def trainer(train_data,test_data):
     train_y = train_y.astype('int')
 
     print('Started training')
-    clf = RandomForestClassifier(n_estimators=1000, 
+    clf = RandomForestClassifier(n_estimators=500, 
         max_depth=10, 
         random_state = SEED, 
         n_jobs=-1)
     clf.fit(train_x,train_y)
-    print('Completed ',clf.score(train_x,train_y))
+    print('Completed Training\n')
+    print('Training Accuracy: ',round(clf.score(train_x,train_y),5))
+
+    test_x, test_y = test_data[:,2:-2], test_data[:,-1]
+    test_y = test_y.astype("int")
+
+    print("Test Accuracy: " + " "*4, round(clf.score(test_x, test_y),5))
 
     dates = list(set(test_data[:,0]))
     predictions = {}
     for day in dates:
         test_d = test_data[test_data[:,0]==day]
-        test_d = test_d[:,2:-2] 
+        test_d = test_d[:,2:-2]
         predictions[day] = clf.predict_proba(test_d)[:,1]
     return predictions
 
@@ -79,6 +85,9 @@ def create_stock_data(df_close,df_open,st):
     st_data['Name'] = [st]*len(st_data)
     
     daily_change = df_close[st]/df_open[st]-1
+
+    count = 0
+
     m = list(range(1,20))+list(range(20,241,20))
     for k in m:
         st_data['IntraR'+str(k)] = daily_change.shift(k)
